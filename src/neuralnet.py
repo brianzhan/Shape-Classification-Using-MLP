@@ -278,16 +278,9 @@ def one_run(output,name):
 
 
 def train_net():
-    #datadir = os.getcwd() + "/data"
-    #datalist = os.listdir(datadir)
     pat = pattern_creator()
-    #test = [one_run([0,1],datadir+"/145735")]
-    # [0,1] is currently defined as square
-    # [1,0] is currently defined as circle
     network = NeuralNetwork(20,7,3) # nInputs, n
     network.train(pat)
-    #network.loadWeights()
-    #network.test(test)
 
 def demo(wpath,testset):
     test = [one_run([0,1],wpath)]
