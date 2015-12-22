@@ -18,23 +18,23 @@ def sigmoid(x, Derivative = False):
 
 # initializing all relevant instances
 class NeuralNetwork:
-    def __init__(self, nInputs, nHiddenLayers, nOutputs):
+    def __init__(self, nInputs, nHiddenNodes, nOutputs):
         # declaring these as global throughout the class
         self.nInputs = nInputs # +1 for bias node
-        self.nHiddenLayers = nHiddenLayers
+        self.nHiddenNodes = nHiddenNodes
         self.nOutputs = nOutputs
         # initialize arrays
         self.arrayInputs = np.ones(nInputs)
-        self.arrayHiddens = np.ones(nHiddenLayers) # by this I mean array hidden nodes
+        self.arrayHiddens = np.ones(nHiddenNodes) # by this I mean array hidden nodes
         self.arrayOutputs = np.ones(nOutputs)
-        self.weightedInputs = np.zeros((self.nInputs, self.nHiddenLayers))
-        self.weightOutputs = np.zeros((self.nHiddenLayers, self.nOutputs))
-        self.prevInputWeightDelta = np.zeros((self.nInputs, self.nHiddenLayers))
-        self.prevOutputWeightDelta = np.zeros((self.nHiddenLayers,self.nOutputs))
+        self.weightedInputs = np.zeros((self.nInputs, self.nHiddenNodes))
+        self.weightOutputs = np.zeros((self.nHiddenNodes, self.nOutputs))
+        self.prevInputWeightDelta = np.zeros((self.nInputs, self.nHiddenNodes))
+        self.prevOutputWeightDelta = np.zeros((self.nHiddenNodes,self.nOutputs))
         for i in range(self.nInputs):
-            for j in range(self.nHiddenLayers):
+            for j in range(self.nHiddenNodes):
                 self.weightedInputs[i][j] = random.uniform(-0.1,0.1) # unfiorm distribution
-        for i in range(self.nHiddenLayers):
+        for i in range(self.nHiddenNodes):
             for j in range(self.nOutputs):
                 self.weightOutputs[i][j] = random.uniform(-0.1,0.1)
 
@@ -43,7 +43,7 @@ class NeuralNetwork:
     def InputActivations(self, inputArray):
         for i in range(self.nInputs): # keep track of all inputs
             self.arrayInputs[i] = inputArray[i]
-        for layerColumn in range(self.nHiddenLayers): # activate inputs to hidden layer
+        for layerColumn in range(self.nHiddenNodes): # activate inputs to hidden layer
             sigmoidSum = 0.0
             for inputRow in range(self.nInputs):
                 sigmoidSum += np.multiply(self.arrayInputs[inputRow],self.weightedInputs[inputRow][layerColumn])
@@ -51,7 +51,7 @@ class NeuralNetwork:
         # output activations. Usually there'd be a for loop over nOutputs but in this case that's not really necessary bc one output column
         for layerColumn in range(self.nOutputs):
             sum = 0.0
-            for hiddenRow in range(self.nHiddenLayers):
+            for hiddenRow in range(self.nHiddenNodes):
                 sum += np.multiply(self.arrayHiddens[hiddenRow],self.weightOutputs[hiddenRow][layerColumn])
             self.arrayOutputs[layerColumn] = sigmoid(sum)
         return self.arrayOutputs[:]
@@ -62,21 +62,21 @@ class NeuralNetwork:
         for outputRow in range(self.nOutputs):
             outputDelta[outputRow] = np.multiply(sigmoid(self.arrayOutputs[outputRow], Derivative=True),np.subtract(targets[outputRow],self.arrayOutputs[outputRow]))
         # calculate error terms for hidden
-        hiddenDelta = np.zeros(self.nHiddenLayers)
-        for hiddenColumn in range(self.nHiddenLayers):
+        hiddenDelta = np.zeros(self.nHiddenNodes)
+        for hiddenColumn in range(self.nHiddenNodes):
             error = 0.0
             for outputRow in range(self.nOutputs):
                 error+= np.multiply(outputDelta[outputRow],self.weightOutputs[hiddenColumn][outputRow])
             hiddenDelta[hiddenColumn] = sigmoid(self.arrayHiddens[hiddenColumn], Derivative=True) * error
         # output weights
-        for hiddenColumn in range(self.nHiddenLayers):
+        for hiddenColumn in range(self.nHiddenNodes):
             for outputRow in range(self.nOutputs):
                 outputChange = np.multiply(outputDelta[outputRow],self.arrayHiddens[hiddenColumn])
                 self.weightOutputs[hiddenColumn][outputRow] = self.weightOutputs[hiddenColumn][outputRow] + LearningRate*outputChange + Momentum*self.prevOutputWeightDelta[hiddenColumn][outputRow]
                 self.prevOutputWeightDelta[hiddenColumn][outputRow] = outputChange
         # input weights
         for i in range(self.nInputs):
-            for j in range(self.nHiddenLayers):
+            for j in range(self.nHiddenNodes):
                 inputDelta = np.multiply(hiddenDelta[j],self.arrayInputs[i])
                 self.weightedInputs[i][j] = self.weightedInputs[i][j] + LearningRate*inputDelta + Momentum*self.prevInputWeightDelta[i][j]
                 self.prevInputWeightDelta[i][j] = inputDelta
@@ -111,7 +111,7 @@ class NeuralNetwork:
         for i in range(self.nInputs):
             print(self.weightedInputs[i])
         print('Output weights:')
-        for j in range(self.nHiddenLayers):
+        for j in range(self.nHiddenNodes):
             print(self.weightOutputs[j])
 
     def train(self, inputArray, numIterate=10000, LearningRate=0.5, Momentum=0.1):
